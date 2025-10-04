@@ -1,4 +1,4 @@
-import { fontFamily } from 'tailwindcss/defaultTheme';
+import { fontFamily } from 'tailwindcss/defaultTheme'
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -6,20 +6,26 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+
+  // 🌙 Enable manual dark mode via class (used in ThemeContext)
   darkMode: 'class',
+
   theme: {
     extend: {
+      // 🧩 Custom font family
       fontFamily: {
         sans: ['Inter', ...fontFamily.sans],
       },
+
+      // 🎨 Define your CSS variable-based colors
       colors: {
-        // Map the theme names to the CSS variables
         text: 'var(--color-text)',
         background: 'var(--color-background)',
         surface: 'var(--color-surface)',
         primary: 'var(--color-primary)',
-      }
+      },
     },
   },
+
   plugins: [],
 }

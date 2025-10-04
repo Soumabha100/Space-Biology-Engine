@@ -1,33 +1,21 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(() => {
-    // Priority 1: Check for a VALID theme saved in localStorage.
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || savedTheme === 'light') {
-      return savedTheme;
-    }
+  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
 
-    // Priority 2: If no valid theme is saved, THEN check the browser/OS preference.
-    const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return userPrefersDark ? 'dark' : 'light';
-  });
-
+  // Apply theme to HTML tag (Tailwind uses `dark:`)
   useEffect(() => {
-    const root = window.document.documentElement;
-    
-    const oldTheme = theme === 'light' ? 'dark' : 'light';
-    root.classList.remove(oldTheme);
-    root.classList.add(theme);
-    
-    localStorage.setItem('theme', theme);
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
-  };
+  const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

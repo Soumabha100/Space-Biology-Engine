@@ -1,0 +1,32 @@
+{
+  "graph": [
+    { "id": 1, "label": "Galaxy", "connections": [2, 3] },
+    { "id": 2, "label": "Star", "connections": [1, 3] },
+    { "id": 3, "label": "Planet", "connections": [1, 2] }
+  ],
+  "summary": {
+    "1": "Galaxies are massive systems of stars, planets, dust, and dark matter.",
+    "2": "Stars are luminous celestial objects made of plasma.",
+    "3": "Planets orbit stars and can support different environments."
+  },
+  "resources": [
+    {
+      "id": 1,
+      "title": "NASA Exoplanet Archive",
+      "description": "A public archive of exoplanet data for researchers and the public.",
+      "url": "https://exoplanetarchive.ipac.caltech.edu/"
+    },
+    {
+      "id": 2,
+      "title": "NASA Astrobiology",
+      "description": "Exploring life in the universe.",
+      "url": "https://astrobiology.nasa.gov/"
+    },
+    {
+      "id": 3,
+      "title": "NASA Exoplanet Exploration",
+      "description": "Learn about planets beyond our solar system, the latest exoplanet discoveries, and NASA’s space telescopes.",
+      "url": "https://exoplanets.nasa.gov/"
+    }
+  ]
+}
