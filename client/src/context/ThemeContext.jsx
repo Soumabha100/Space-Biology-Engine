@@ -5,7 +5,6 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     // Priority 1: Check for a VALID theme saved in localStorage.
-    // This ensures your last choice from the toggle is always remembered.
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark' || savedTheme === 'light') {
       return savedTheme;
@@ -19,7 +18,6 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     const root = window.document.documentElement;
     
-    // A more explicit way to swap classes
     const oldTheme = theme === 'light' ? 'dark' : 'light';
     root.classList.remove(oldTheme);
     root.classList.add(theme);
