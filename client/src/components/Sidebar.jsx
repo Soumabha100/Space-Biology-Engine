@@ -5,18 +5,18 @@ import ThemeToggle from "./ThemeToggle";
 
 const Sidebar = () => {
   const navLinkClass = ({ isActive }) =>
-    `flex items-center p-3 my-2 rounded-lg transition-colors ${
+    `relative flex items-center justify-center h-12 w-12 rounded-lg transition-colors group ${
       isActive
-        ? "bg-primary/20 text-primary" // Simplified classes
-        : "text-gray-500 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-surface"
+        ? "text-primary bg-primary/20"
+        : "text-text-dim hover:text-text hover:bg-surface"
     }`;
 
   return (
-    <aside className="w-20 flex flex-col items-center bg-surface border-r border-gray-200 dark:border-gray-700 py-4">
+    <aside className="w-20 flex flex-col items-center bg-background border-r border-border py-4">
       <div className="p-2 mb-4">
-        <Zap className="h-8 w-8 text-primary" /> {/* Simplified class */}
+        <Zap className="h-8 w-8 text-primary" />
       </div>
-      <nav className="flex flex-col items-center flex-1">
+      <nav className="flex flex-col items-center flex-1 gap-y-2">
         <NavLink to="/" className={navLinkClass} title="Knowledge Explorer">
           <Compass size={24} />
         </NavLink>

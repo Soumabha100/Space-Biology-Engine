@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-// CRITICAL: Ensure the import below is exactly { ForceGraph2D }
-import { ForceGraph2D } from "react-force-graph";
+import ForceGraph2D from "react-force-graph-2d";
 import axios from "axios";
 
 const GraphCanvas = ({ onNodeClick }) => {
@@ -17,44 +16,52 @@ const GraphCanvas = ({ onNodeClick }) => {
   }, []);
 
   useEffect(() => {
-    if (graphData.nodes.length > 0) {
+    if (graphData.nodes.length > 0 && fgRef.current) {
       fgRef.current.zoomToFit(400, 100);
     }
   }, [graphData]);
 
   return (
     <div className="w-full h-full bg-background">
-      {/* CRITICAL: Ensure the component tag below is exactly <ForceGraph2D ... /> */}
       <ForceGraph2D
         ref={fgRef}
         graphData={graphData}
         nodeLabel="id"
-        nodeAutoColorBy="type"
+        // Link styling
+        linkWidth={1}
+        linkColor={() => "rgba(107, 114, 128, 0.5)"}
         linkDirectionalArrowLength={3.5}
         linkDirectionalArrowRelPos={1}
+        // Add link particles for a "data flow" animation
+        linkDirectionalParticles={2}
+        linkDirectionalParticleWidth={1.5}
+        linkDirectionalParticleColor={() => "#8b5cf6"}
         onNodeClick={onNodeClick}
+        // New Node Drawing Logic
         nodeCanvasObject={(node, ctx, globalScale) => {
           const label = node.id;
           const fontSize = 14 / globalScale;
-          ctx.font = `${fontSize}px Sans-Serif`;
+          ctx.font = `600 ${fontSize}px Inter`; // Bolder font
 
-          const textWidth = ctx.measureText(label).width;
-          const bckgDimensions = [textWidth, fontSize].map(
-            (n) => n + fontSize * 0.4
-          );
-          ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-          ctx.fillRect(
-            node.x - bckgDimensions[0] / 2,
-            node.y - bckgDimensions[1] / 2,
-            ...bckgDimensions
-          );
+          const nodeSize = 8;
 
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
+          // Draw halo for a glow effect
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, nodeSize + 2, 0, 2 * Math.PI, false);
+          ctx.fillStyle = `${node.color}50`; // Semi-transparent color for halo
+          ctx.fill();
+
+          // Draw main node circle
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, nodeSize, 0, 2 * Math.PI, false);
           ctx.fillStyle = node.color;
-          ctx.fillText(label, node.x, node.y);
+          ctx.fill();
 
-          node.__bckgDimensions = bckgDimensions;
+          // Draw text
+          ctx.textAlign = "left";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "white"; // White text for better readability
+          ctx.fillText(label, node.x + nodeSize + 5, node.y);
         }}
       />
     </div>
