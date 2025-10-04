@@ -1,40 +1,35 @@
-/* 1. Use the standard Tailwind directives. This is the correct way to import Tailwind. */
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* Default (Light Mode) */
 :root {
-  --color-text: #d1d5db; /* Lighter gray text */
-  --color-text-dim: #9ca3af; /* Dimmer text for secondary info */
-  --color-background: #111827; /* A deep, cool blue-gray */
-  --color-surface: #1f2937; /* Slightly lighter surface for panels */
-  --color-primary: #8b5cf6; /* Vibrant purple */
-  --color-highlight: #38bdf8; /* Bright cyan for highlights */
-  --color-border: #374151; /* Subtle borders */
+  --color-text: #1a1a1a;
+  --color-background: #ffffff;
+  --color-surface: #f9fafb;
+  --color-primary: #3b82f6;
 }
 
+/* Dark Mode */
 .dark {
-  /* Dark theme is the default, but you can define different variables here if needed */
-  --color-text: #d1d5db;
-  --color-text-dim: #9ca3af;
+  --color-text: #e5e7eb;
   --color-background: #111827;
   --color-surface: #1f2937;
-  --color-primary: #8b5cf6;
-  --color-highlight: #38bdf8;
-  --color-border: #374151;
+  --color-primary: #60a5fa;
 }
 
-/* 3. Apply the theme colors DIRECTLY using the CSS variables. Do NOT use @apply here. */
+/* Apply theme variables */
 body {
   background-color: var(--color-background);
   color: var(--color-text);
-  font-family: "Inter", sans-serif; /* Apply the new font */
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-  /* --- Keep your other base styles --- */
-  margin: 0;
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Optional: style for cards or sections */
+.section {
+  background-color: var(--color-surface);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
