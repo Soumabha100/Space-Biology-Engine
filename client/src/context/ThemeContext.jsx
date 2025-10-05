@@ -1,21 +1,30 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
-export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
+export const useTheme = () => useContext(ThemeContext);
 
-  // Apply theme to HTML tag (Tailwind uses `dark:`)
+export const ThemeProvider = ({ children }) => {
+  // Initialize theme from localStorage or default to 'dark'
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+
   useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    localStorage.setItem("theme", theme);
+    const root = window.document.documentElement;
+    
+    // Remove the opposite theme class
+    const oldTheme = theme === 'dark' ? 'light' : 'dark';
+    root.classList.remove(oldTheme);
+
+    // Add the current theme class to the <html> element
+    root.classList.add(theme);
+
+    // Save the theme to localStorage
+    localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === 'dark' ? 'light' : 'dark'));
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
@@ -23,5 +32,3 @@ export const ThemeProvider = ({ children }) => {
     </ThemeContext.Provider>
   );
 };
-
-export const useTheme = () => useContext(ThemeContext);
