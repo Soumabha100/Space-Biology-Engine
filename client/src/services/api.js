@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://sbke.vercel.app/api";
+const API_BASE_URL = "http://localhost:3000/api";
 
 export const getEntityData = async (entityId) => {
   if (!entityId) {
@@ -58,9 +58,6 @@ export const sendChatMessage = async (entityId, messages) => {
     return response.data;
   } catch (error) {
     console.error("Error sending chat message:", error);
-    return {
-      role: "model",
-      parts: "Sorry, I encountered an error. Please try again.",
-    };
+    return {status:500, data: error.response.data};
   }
 };

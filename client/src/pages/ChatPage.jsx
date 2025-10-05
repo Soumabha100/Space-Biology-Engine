@@ -57,20 +57,19 @@ const ChatPage = () => {
     setIsLoading(true);
     
     const aiResponse = await sendChatMessage(entityId, updatedMessages);
-    if(aiResponse?.status == 429) {
+    if(aiResponse.data?.status == 429) {
       setMessages((prevMessages) => [...prevMessages, {role:"system", content: "You've reached your ratelimits for today. Please check back tomorrow."}])
       setIsLoading(false)
       return
     }
-
-    if(aiResponse?.status == 500 && aiResponse?.error.status == 429) {
+    if(aiResponse.data?.status == 500) {
       setMessages((prevMessages) => [...prevMessages, {role:"system", content: "We've reached our ratelimits for today. Please check back tomorrow."}])
       setIsLoading(false)
       return
     }
     
     // Use the functional form again to add the AI's response correctly
-    setMessages((prevMessages) => [...prevMessages, {role:"assistant", content: aiResponse.data}]);
+    setMessages((prevMessages) => [...prevMessages, {role:"assistant", content: aiResponse.data.content}]);
     setIsLoading(false);
   };
 
