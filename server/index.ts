@@ -150,7 +150,7 @@ app.post("/api/createChat", (req, res) => {
   delete data.processedAt
   delete data.schTxt
   openai.chat.completions.create({
-    model: "gemini-2.5-flash",
+    model: "gemini-2.5-flash-lite",
     messages: [
       {
         role: "system",
