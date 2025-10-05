@@ -4,6 +4,7 @@
     "cheerio": "^1.1.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
+    "express-rate-limit": "^8.1.0",
     "node-fetch": "^3.3.2",
     "nodemon": "^3.1.10",
     "openai": "^6.1.0"

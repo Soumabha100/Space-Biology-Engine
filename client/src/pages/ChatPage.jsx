@@ -32,8 +32,8 @@ const ChatPage = () => {
       if (data?.summary) {
         setMessages([
           {
-            role: "model",
-            parts: `Here's a summary about ${data.title}:\n\n${data.summary}\n\nWhat would you like to know more about?`,
+            role: "assistant",
+            content: `Here's a summary about ${data.title}:\n\n${data.summary}\n\nWhat would you like to know more about?`,
           },
         ]);
       }
@@ -50,17 +50,20 @@ const ChatPage = () => {
   }, [messages]);
 
   const handleSendMessage = async (userInput) => {
-    const newUserMessage = { role: "user", parts: userInput };
-
+    const newUserMessage = { role: "user", content: userInput };
+    const updatedMessages = [...messages, newUserMessage];
+    const aiResponse = await sendChatMessage(entityId, updatedMessages);
+    if(aiResponse?.status != 200) {
+      alert("ratelimit reached")
+      return
+    }
     // Use the functional form of setMessages to ensure we have the latest state
     setMessages((prevMessages) => [...prevMessages, newUserMessage]);
     setIsLoading(true);
 
-    const updatedMessages = [...messages, newUserMessage];
-    const aiResponse = await sendChatMessage(entityId, updatedMessages);
-
+    
     // Use the functional form again to add the AI's response correctly
-    setMessages((prevMessages) => [...prevMessages, aiResponse]);
+    setMessages((prevMessages) => [...prevMessages, aiResponse.data]);
     setIsLoading(false);
   };
 

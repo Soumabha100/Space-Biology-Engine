@@ -3,8 +3,8 @@ import { Bot, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const ChatMessage = ({ message }) => {
-  const { role, parts } = message;
-  const isModel = role === "model";
+  const { role, content } = message;
+  const isModel = role === "assistant";
 
   return (
     <div
@@ -29,7 +29,7 @@ const ChatMessage = ({ message }) => {
           instead of the ReactMarkdown component itself.
         */}
         <div className="prose prose-sm prose-invert max-w-none">
-          <ReactMarkdown>{parts}</ReactMarkdown>
+          <ReactMarkdown>{content}</ReactMarkdown>
         </div>
       </div>
     </div>

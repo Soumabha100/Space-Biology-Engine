@@ -55,7 +55,7 @@ export const sendChatMessage = async (entityId, messages) => {
       docId: entityId,
       messages: messages,
     });
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error("Error sending chat message:", error);
     return {
