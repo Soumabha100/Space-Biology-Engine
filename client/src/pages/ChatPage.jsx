@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getEntityData, sendChatMessage } from "../services/api";
 import { ArrowLeft, Dna, TestTube, FileText } from "lucide-react";
@@ -52,15 +52,22 @@ const ChatPage = () => {
   const handleSendMessage = async (userInput) => {
     const newUserMessage = { role: "user", content: userInput };
     const updatedMessages = [...messages, newUserMessage];
-    const aiResponse = await sendChatMessage(entityId, updatedMessages);
-    if(aiResponse?.status != 200) {
-      alert("ratelimit reached")
-      return
-    }
     // Use the functional form of setMessages to ensure we have the latest state
     setMessages((prevMessages) => [...prevMessages, newUserMessage]);
     setIsLoading(true);
+    
+    const aiResponse = await sendChatMessage(entityId, updatedMessages);
+    if(aiResponse?.status == 429) {
+      setMessages((prevMessages) => [...prevMessages, {role:"system", content: "You've reached your ratelimits for today. Please check back tomorrow."}])
+      setIsLoading(false)
+      return
+    }
 
+    if(aiResponse?.status == 500 && aiResponse?.error.status == 429) {
+      setMessages((prevMessages) => [...prevMessages, {role:"system", content: "We've reached our ratelimits for today. Please check back tomorrow."}])
+      setIsLoading(false)
+      return
+    }
     
     // Use the functional form again to add the AI's response correctly
     setMessages((prevMessages) => [...prevMessages, {role:"assistant", content: aiResponse.data}]);
