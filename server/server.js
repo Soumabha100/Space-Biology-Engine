@@ -1,97 +1,66 @@
-const express = require("express");
-const cors = require("cors");
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 const PORT = 8000;
 
-// --- Expanded Mock Data ---
-const MOCK_SEARCH_RESULTS = [
-  {
-    id: "Bone Loss",
-    type: "Disease",
-    description:
-      "Reduction in the quantity of bone or atrophy of skeletal tissue.",
-    tags: ["Musculoskeletal", "Microgravity Effect"],
-  },
-  {
-    id: "Microgravity",
-    type: "Space Stressor",
-    description:
-      "The condition of experiencing little or no gravitational force.",
-    tags: ["Environment", "Fundamental Factor"],
-  },
-  {
-    id: "Cosmic Radiation",
-    type: "Space Stressor",
-    description:
-      "High-energy particles that originate from outside the Earth's solar system.",
-    tags: ["Environment", "Radiation"],
-  },
-  {
-    id: "Osteoclasts",
-    type: "Biological Process",
-    description: "Cells responsible for the breakdown of bone tissue.",
-    tags: ["Cellular Biology", "Bone Remodeling"],
-  },
-];
-
-const MOCK_GRAPH_DATA = {
-  "bone-loss": {
-    nodes: [
-      { id: "Microgravity", type: "Space Stressor", color: "#ef4444" },
-      { id: "Bone Loss", type: "Disease", color: "#3b82f6" },
-      { id: "Osteoclasts", type: "Biological Process", color: "#f97316" },
-      { id: "Cosmic Radiation", type: "Space Stressor", color: "#ef4444" },
-    ],
-    links: [
-      { source: "Microgravity", target: "Bone Loss", label: "CAUSES" },
-      { source: "Microgravity", target: "Osteoclasts", label: "ACTIVATES" },
-      { source: "Osteoclasts", target: "Bone Loss", label: "CONTRIBUTES TO" },
-      { source: "Cosmic Radiation", target: "Bone Loss", label: "EXACERBATES" },
-    ],
-  },
-};
-
-const MOCK_SUMMARY = {
-  "bone-loss": {
-    entityName: "Bone Loss",
-    generatedSummary:
-      "Based on multiple studies, microgravity is a primary driver of bone density loss in astronauts. It activates osteoclasts, the cells responsible for bone breakdown. This effect is a critical concern for long-duration missions to the Moon and Mars.",
-  },
-};
+// Load the database from db.json
+const dbPath = path.join(__dirname, '../client/db.json');
+let db = { genes: [], diseases: [], publications: [] };
+try {
+  const data = fs.readFileSync(dbPath, 'utf8');
+  db = JSON.parse(data);
+} catch (err) {
+  console.error("Error reading db.json:", err);
+}
 
 // --- API Endpoints ---
 
-// 1. Search Endpoint
-app.get("/api/search", (req, res) => {
-  const { query } = req.query;
-  console.log(`[Mock Server] Received search for: ${query}`);
-  if (!query) {
-    return res.json([]);
-  }
-  const filteredResults = MOCK_SEARCH_RESULTS.filter((item) =>
-    item.id.toLowerCase().includes(query.toLowerCase())
-  );
-  res.json(filteredResults);
+// 1. Search Endpoint (No changes needed here)
+app.get('/api/search', (req, res) => {
+    const { query } = req.query;
+    if (!query) return res.json([]);
+    const lowerCaseQuery = query.toLowerCase();
+    const genes = db.genes.filter(g => g.name.toLowerCase().includes(lowerCaseQuery)).map(g => ({ ...g, type: 'Gene' }));
+    const diseases = db.diseases.filter(d => d.name.toLowerCase().includes(lowerCaseQuery)).map(d => ({ ...d, type: 'Disease' }));
+    const publications = db.publications.filter(p => p.title.toLowerCase().includes(lowerCaseQuery)).map(p => ({ ...p, type: 'Publication' }));
+    res.json([...genes, ...diseases, ...publications].slice(0, 20));
 });
 
-// 2. Graph Data Endpoint
-app.get("/api/graph/:entityId", (req, res) => {
-  console.log(
-    `[Mock Server] Received request for graph data for: ${req.params.entityId}`
-  );
-  const entityKey = req.params.entityId.toLowerCase().replace(" ", "-");
-  res.json(MOCK_GRAPH_DATA[entityKey] || { nodes: [], links: [] });
+// 2. Graph Data Endpoint (No changes needed here)
+app.get('/api/graph/:entityId', (req, res) => {
+    const { entityId } = req.params;
+    const centralNode = db.genes.find(g => g.name === entityId) || db.diseases.find(d => d.name === entityId);
+    if (!centralNode || !centralNode.related_genes) return res.json({ nodes: [], links: [] });
+    const nodes = [{ id: centralNode.name, type: centralNode.type || 'Gene', color: '#8b5cf6' }];
+    const links = [];
+    centralNode.related_genes.forEach(geneName => {
+        nodes.push({ id: geneName, type: 'Gene', color: '#3b82f6' });
+        links.push({ source: centralNode.name, target: geneName });
+    });
+    centralNode.related_diseases?.forEach(diseaseName => {
+        nodes.push({ id: diseaseName, type: 'Disease', color: '#ef4444' });
+        links.push({ source: centralNode.name, target: diseaseName });
+    });
+    res.json({ nodes, links });
 });
 
-// 3. Summary Endpoint
-app.get("/api/summary/:entityId", (req, res) => {
-  console.log(
-    `[Mock Server] Received request for summary for: ${req.params.entityId}`
-  );
-  const entityKey = req.params.entityId.toLowerCase().replace(" ", "-");
-  res.json(MOCK_SUMMARY[entityKey] || {});
+// 3. Summary Endpoint (No changes needed here)
+app.get('/api/summary/:entityId', (req, res) => {
+    const { entityId } = req.params;
+    res.json({ generatedSummary: `This is an AI-generated summary for ${entityId}. It highlights its critical role in space biology...` });
+});
+
+// 4. NEW: Tags Endpoint
+app.get('/api/tags', (req, res) => {
+    console.log(`[Server] Received request for tags`);
+    const allTags = new Set();
+    db.genes.forEach(g => g.tags?.forEach(tag => allTags.add(tag)));
+    db.diseases.forEach(d => d.tags?.forEach(tag => allTags.add(tag)));
+    res.json(Array.from(allTags));
 });
 
 app.listen(PORT, () => {

@@ -1,20 +1,17 @@
 import React, { createContext, useState, useContext } from "react";
 import axios from "axios";
-import { TestTube, BrainCircuit, Atom, Sun } from "lucide-react";
+import { TestTube, Dna, FileText } from "lucide-react";
 
 const SearchContext = createContext();
 
-// Helper to get an icon based on type
 const getIconForType = (type) => {
   switch (type) {
     case "Disease":
       return <TestTube size={18} />;
-    case "Space Stressor":
-      return <Sun size={18} />;
-    case "Biological Process":
-      return <Atom size={18} />;
+    case "Gene":
+      return <Dna size={18} />;
     default:
-      return <BrainCircuit size={18} />;
+      return <FileText size={18} />;
   }
 };
 
@@ -25,7 +22,7 @@ export const SearchProvider = ({ children }) => {
 
   const performSearch = async (query) => {
     setSearchQuery(query);
-    if (!query) {
+    if (!query.trim()) {
       setSearchResults([]);
       return;
     }
@@ -34,9 +31,9 @@ export const SearchProvider = ({ children }) => {
       const response = await axios.get(
         `http://localhost:8000/api/search?query=${query}`
       );
-      // Add the icon to each result
       const resultsWithIcons = response.data.map((item) => ({
         ...item,
+        id: item.name || item.title, // Normalize the ID field
         icon: getIconForType(item.type),
       }));
       setSearchResults(resultsWithIcons);
