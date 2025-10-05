@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://sbke.vercel.app";
+const API_BASE_URL = "https://sbke.vercel.app/api";
 
 export const getEntityData = async (entityId) => {
   if (!entityId) {
