@@ -1,69 +1,45 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { PanelRightClose, PanelRightOpen } from "lucide-react";
-
-// 1. Import the header here
+import { useSearch } from "../context/SearchContext";
 import GlobalHeader from "../components/GlobalHeader";
 import ResultsPanel from "../components/ResultsPanel";
-import GraphCanvas from "../components/GraphCanvas";
-import InspectorPanel from "../components/InspectorPanel";
+import InspectorPanel from "../components/InspectorPanel"; // You might want to integrate this differently later
 
 const ExplorerPage = () => {
-  const [activeEntity, setActiveEntity] = useState(null);
-  const [isInspectorOpen, setIsInspectorOpen] = useState(true);
+  const { setSelectedEntity, selectedEntity } = useSearch();
+
+  const handleResultClick = (result) => {
+    setSelectedEntity(result);
+  };
+
+  const handleCloseInspector = () => {
+    setSelectedEntity(null);
+  };
 
   return (
-    <div className="h-full w-full flex flex-col">
-      {/* 2. A dedicated, static header area */}
-      <div className="w-full">
-        <GlobalHeader />
-      </div>
+    <div className="flex flex-col h-screen bg-background text-text-primary">
+      {/* The global header with the search bar stays at the top */}
+      <GlobalHeader />
 
-      {/* 3. The main content area that takes the remaining space */}
-      <div className="flex-1 relative">
-        {/* 4. The Graph Canvas with our new thematic background */}
-        <div className="absolute inset-0 graph-background">
-          <GraphCanvas
-            activeEntity={activeEntity}
-            onNodeClick={setActiveEntity}
-          />
+      <main className="flex-1 flex container mx-auto p-4 gap-4">
+        {/* The main content area where results or tags will be shown */}
+        <div className="w-full md:w-1/3">
+          <ResultsPanel onResultClick={handleResultClick} />
         </div>
 
-        {/* 5. Floating ResultsPanel with adjusted starting position */}
-        <motion.div
-          drag
-          dragMomentum={false}
-          className="absolute top-4 left-4 w-full max-w-md"
-        >
-          <div className="bg-surface/80 backdrop-blur-sm rounded-xl border border-border shadow-2xl overflow-hidden max-h-[70vh] flex flex-col">
-            <ResultsPanel onResultClick={setActiveEntity} />
-          </div>
-        </motion.div>
-
-        {/* Inspector Panel (no changes needed here) */}
-        <AnimatePresence>
-          {isInspectorOpen && (
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "tween", duration: 0.3 }}
-              className="absolute top-0 right-0 h-full w-full max-w-sm"
-            >
-              <InspectorPanel activeEntity={activeEntity} />
-            </motion.div>
+        {/* The inspector panel will show on the right when an item is clicked */}
+        <div className="hidden md:block md:w-2/3">
+          {selectedEntity ? (
+            <InspectorPanel
+              entity={selectedEntity}
+              onClose={handleCloseInspector}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-text-dim">
+              <p>Select an entity to see details</p>
+            </div>
           )}
-        </AnimatePresence>
-
-        {/* Inspector Toggle Button with adjusted position */}
-        <button
-          onClick={() => setIsInspectorOpen(!isInspectorOpen)}
-          className="absolute top-4 right-4 bg-surface/80 hover:bg-surface backdrop-blur-sm p-2 rounded-lg border border-border shadow-lg transition-colors"
-          title={isInspectorOpen ? "Close Inspector" : "Open Inspector"}
-        >
-          {isInspectorOpen ? <PanelRightClose /> : <PanelRightOpen />}
-        </button>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };

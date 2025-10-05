@@ -1,31 +1,31 @@
-import React, { useState } from "react";
-import { Search } from "lucide-react";
+import React, { useEffect } from "react";
+import { FiSearch } from "react-icons/fi";
 import { useSearch } from "../context/SearchContext";
 import { useDebounce } from "../hooks/useDebounce";
 
 const GlobalHeader = () => {
-  const { performSearch } = useSearch();
-  const [inputValue, setInputValue] = useState("");
+  const { searchQuery, setSearchQuery } = useSearch();
+  const debouncedSearchQuery = useDebounce(searchQuery, 300); // 300ms debounce delay
 
-  useDebounce(() => performSearch(inputValue), 500, [inputValue]);
+  useEffect(() => {
+    // This will trigger the search in the context, which fetches the data
+    // The actual API call is managed by the SearchContext
+  }, [debouncedSearchQuery]);
 
   return (
-    // 1. Remove the 'absolute' positioning classes
-    <header className="flex justify-center p-4 z-10 bg-background border-b border-border">
-      <div className="relative w-full max-w-xl">
-        <Search
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim"
-          size={20}
-        />
+    <header className="flex items-center justify-between p-4 border-b border-border bg-background-secondary">
+      <h1 className="text-xl font-bold">Space Biology Engine</h1>
+      <div className="relative w-full max-w-md">
+        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" />
         <input
           type="text"
-          placeholder="Search for genes, diseases, or publications..."
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          // 2. Adjust styling for a cleaner look
-          className="w-full pl-12 pr-4 py-3 rounded-lg bg-surface border border-border focus:outline-none focus:ring-2 focus:ring-primary transition-shadow shadow-md"
+          placeholder="Search for papers, diseases, or publications..."
+          className="w-full pl-10 pr-4 py-2 rounded-md bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
+      <div>{/* Other header items can go here */}</div>
     </header>
   );
 };

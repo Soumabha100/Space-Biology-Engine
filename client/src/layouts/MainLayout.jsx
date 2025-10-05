@@ -6,8 +6,8 @@ const MainLayout = () => {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
-      {/* The fix is here: removing the redundant 'h-screen' class from <main>
-          allows the flex container to correctly manage the height. */}
+      {/* This 'flex-1' class is all that's needed to make the main content
+          area fill the remaining space correctly. */}
       <main className="flex-1 overflow-hidden">
         <Outlet />
       </main>

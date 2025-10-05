@@ -45,8 +45,8 @@ export const searchEntities = async (query) => {
  */
 export const getTags = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/tags`);
-    return response.data;
+    const response = await axios.get(`${API_BASE_URL}/docByTags`);
+    return response.data.tags || []; 
   } catch (error) {
     console.error("Error fetching tags:", error);
     return [];
