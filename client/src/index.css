@@ -2,34 +2,89 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Default (Light Mode) */
+/* =========================
+   Light Mode (Default)
+========================= */
 :root {
-  --color-text: #1a1a1a;
-  --color-background: #ffffff;
-  --color-surface: #f9fafb;
-  --color-primary: #3b82f6;
+  --color-text: #1e293b; /* slate-800 */
+  --color-background: #f8fafc; /* light gray-blue */
+  --color-surface: #ffffff; /* pure white for cards */
+  --color-primary: #3b82f6; /* blue-500 */
+  --color-border: #e2e8f0; /* subtle gray border */
 }
 
-/* Dark Mode */
+/* =========================
+   Dark Mode
+========================= */
 .dark {
-  --color-text: #e5e7eb;
-  --color-background: #111827;
-  --color-surface: #1f2937;
-  --color-primary: #60a5fa;
+  --color-text: #e2e8f0; /* slate-200 */
+  --color-background: #0f172a; /* slate-900 */
+  --color-surface: #1e293b; /* slate-800 */
+  --color-primary: #60a5fa; /* blue-400 */
+  --color-border: #334155;
 }
 
-/* Apply theme variables */
+/* =========================
+   Base Styles
+========================= */
 body {
   background-color: var(--color-background);
   color: var(--color-text);
   font-family: 'Inter', sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-/* Optional: style for cards or sections */
+/* =========================
+   Section / Card Styling
+========================= */
 .section {
   background-color: var(--color-surface);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  padding: 1.25rem;
+  margin: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.section:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================
+   Sidebar (Optional)
+========================= */
+.sidebar {
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* =========================
+   Buttons
+========================= */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+/* =========================
+   Utilities
+========================= */
+.soft-shadow {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+}
+
+.smooth-transition {
+  transition: all 0.3s ease-in-out;
 }
