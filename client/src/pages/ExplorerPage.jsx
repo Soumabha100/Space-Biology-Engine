@@ -107,6 +107,7 @@ const ExplorerPage = () => {
   };
 
   return (
+    // This top-level div allows the modal to overlay the entire page
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
       <GlobalHeader />
       <main className="flex flex-1 overflow-hidden">
@@ -116,17 +117,16 @@ const ExplorerPage = () => {
         <div className="w-[20%] max-w-xs border-l border-border">
           <PopularTagsSidebar />
         </div>
-
-        {/* **MODAL LOGIC** */}
-        <AnimatePresence>
-          {selectedEntity && (
-            <InspectorPanel
-              entity={selectedEntity}
-              onClose={handleCloseInspector}
-            />
-          )}
-        </AnimatePresence>
       </main>
+
+      <AnimatePresence>
+        {selectedEntity && (
+          <InspectorPanel
+            entity={selectedEntity}
+            onClose={handleCloseInspector}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

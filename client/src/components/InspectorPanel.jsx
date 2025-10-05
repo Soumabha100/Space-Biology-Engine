@@ -38,7 +38,8 @@ const InspectorPanel = ({ entity, onClose }) => {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border flex-shrink-0">
-          <h2 className="text-2xl font-bold text-primary truncate pr-12">
+          {/* **FIX APPLIED HERE:** Changed `text-primary` to `text-foreground` for better contrast */}
+          <h2 className="text-2xl font-bold text-foreground truncate pr-12">
             {entity.title || "Details"}
           </h2>
           <button
