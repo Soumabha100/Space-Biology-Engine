@@ -29,11 +29,11 @@ export const SearchProvider = ({ children }) => {
     setIsSearching(true);
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/search?query=${query}`
+        `http://localhost:3000/api/docBySearch?q=${query}`
       );
       const resultsWithIcons = response.data.map((item) => ({
         ...item,
-        id: item.name || item.title, // Normalize the ID field
+        id: item.id || item.title, // Normalize the ID field
         icon: getIconForType(item.type),
       }));
       setSearchResults(resultsWithIcons);

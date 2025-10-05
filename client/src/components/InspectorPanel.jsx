@@ -1,28 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { Bot } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from 'axios';
+// Import your new API function
+import { getEntityData } from "../services/api";
 
 const InspectorPanel = ({ activeEntity }) => {
-  const [summary, setSummary] = useState('');
+  const [summary, setSummary] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (activeEntity) {
-      setIsLoading(true);
-      setSummary(''); // Clear previous summary
-      axios.get(`http://localhost:8000/api/summary/${activeEntity.id}`)
-        .then(response => {
-          setSummary(response.data.generatedSummary);
-        })
-        .catch(error => {
-          console.error("Error fetching summary:", error);
-          setSummary('Could not load summary.');
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
+    const fetchSummary = async () => {
+      if (activeEntity?.id) {
+        setIsLoading(true);
+        setSummary(""); // Clear previous summary
+
+        // Use the new, unified getEntityData function
+        const data = await getEntityData(activeEntity.id);
+
+        // The summary is now nested inside the response
+        if (data?.summary) {
+          setSummary(data.summary);
+        } else {
+          setSummary("Could not load summary.");
+        }
+        setIsLoading(false);
+      }
+    };
+
+    fetchSummary();
   }, [activeEntity]);
 
   return (
@@ -38,9 +43,13 @@ const InspectorPanel = ({ activeEntity }) => {
             transition={{ duration: 0.3 }}
             className="px-2"
           >
-            <h3 className="text-lg font-semibold text-highlight mb-2">{activeEntity.id}</h3>
-            <p className="text-sm text-text-dim mb-4">Type: {activeEntity.type}</p>
-            
+            <h3 className="text-lg font-semibold text-highlight mb-2">
+              {activeEntity.id}
+            </h3>
+            <p className="text-sm text-text-dim mb-4">
+              Type: {activeEntity.type}
+            </p>
+
             <div className="mt-4 p-4 bg-background rounded-lg border border-border">
               <h4 className="flex items-center font-semibold mb-2 text-primary">
                 <Bot size={20} className="mr-2" />
@@ -49,7 +58,9 @@ const InspectorPanel = ({ activeEntity }) => {
               {isLoading ? (
                 <p className="text-sm text-text-dim">Loading summary...</p>
               ) : (
-                <p className="text-sm leading-relaxed text-text-dim">{summary}</p>
+                <p className="text-sm leading-relaxed text-text-dim">
+                  {summary}
+                </p>
               )}
             </div>
           </motion.div>

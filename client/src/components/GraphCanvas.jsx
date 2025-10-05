@@ -1,22 +1,29 @@
 import React, { useEffect, useState, useRef } from "react";
 import ForceGraph2D from "react-force-graph-2d";
-import axios from "axios";
+// Import your new API function
+import { getEntityData } from "../services/api";
 
 const GraphCanvas = ({ activeEntity, onNodeClick }) => {
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const fgRef = useRef();
 
   useEffect(() => {
-    if (activeEntity) {
-      axios
-        .get(`http://localhost:8000/api/graph/${activeEntity.id}`)
-        .then((response) => {
-          setGraphData(response.data);
-        })
-        .catch((error) => console.error("Error fetching graph data:", error));
-    } else {
-      setGraphData({ nodes: [], links: [] }); // Clear graph if no entity is selected
-    }
+    // Use the new async/await syntax for cleaner code
+    const fetchData = async () => {
+      if (activeEntity?.id) {
+        // Use the new, unified getEntityData function
+        const data = await getEntityData(activeEntity.id);
+        // The graph data is now nested inside the response
+        if (data?.graph) {
+          setGraphData(data.graph);
+        }
+      } else {
+        // Clear graph if no entity is selected
+        setGraphData({ nodes: [], links: [] });
+      }
+    };
+
+    fetchData();
   }, [activeEntity]); // Re-run this effect when the activeEntity changes
 
   useEffect(() => {
