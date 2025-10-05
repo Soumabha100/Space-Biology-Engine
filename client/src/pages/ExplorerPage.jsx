@@ -1,12 +1,11 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSearch } from "../context/SearchContext";
 import GlobalHeader from "../components/GlobalHeader";
 import InspectorPanel from "../components/InspectorPanel";
 import SearchCard from "../components/SearchCard";
 import PopularTagsSidebar from "../components/PopularTagsSidebar";
 
-// A new, internal component for a professional loading state.
 const SearchCardSkeleton = () => (
   <div className="w-full p-4 rounded-lg border bg-card/50 animate-pulse">
     <div className="flex items-start gap-4">
@@ -32,20 +31,15 @@ const ExplorerPage = () => {
     searchQuery,
     isSearching,
     canLoadMore,
-    loadMoreResults, // Correctly retrieved from the context
+    loadMoreResults,
     totalResults,
   } = useSearch();
-
-  const handleResultClick = (result) => {
-    setSelectedEntity(result);
-  };
 
   const handleCloseInspector = () => {
     setSelectedEntity(null);
   };
 
   const renderMainContent = () => {
-    // Show skeleton loaders only on the initial search
     if (isSearching && searchResults.length === 0) {
       return (
         <div className="flex flex-col gap-4">
@@ -67,13 +61,8 @@ const ExplorerPage = () => {
             </p>
           </div>
           <div className="flex flex-col gap-4">
-            {searchResults.map((result, index) => (
-              <SearchCard
-                key={result.id}
-                result={result}
-                onResultClick={handleResultClick}
-                index={index}
-              />
+            {searchResults.filter(Boolean).map((result, index) => (
+              <SearchCard key={result.id || index} entity={result} />
             ))}
           </div>
 
@@ -104,7 +93,6 @@ const ExplorerPage = () => {
       );
     }
 
-    // Default view with instructions
     return (
       <div className="text-center text-muted-foreground mt-12">
         <h2 className="text-2xl font-bold mb-2">
@@ -122,22 +110,22 @@ const ExplorerPage = () => {
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
       <GlobalHeader />
       <main className="flex flex-1 overflow-hidden">
-        {selectedEntity && (
-          <div className="w-[30%] max-w-md flex-shrink-0 border-r border-border p-4 custom-scrollbar overflow-y-auto">
+        <div className="flex-1 p-6 overflow-y-auto custom-scrollbar">
+          {renderMainContent()}
+        </div>
+        <div className="w-[20%] max-w-xs border-l border-border">
+          <PopularTagsSidebar />
+        </div>
+
+        {/* **MODAL LOGIC** */}
+        <AnimatePresence>
+          {selectedEntity && (
             <InspectorPanel
               entity={selectedEntity}
               onClose={handleCloseInspector}
             />
-          </div>
-        )}
-
-        <div className="flex-1 p-6 overflow-y-auto custom-scrollbar">
-          {renderMainContent()}
-        </div>
-
-        <div className="w-[20%] max-w-xs border-l border-border">
-          <PopularTagsSidebar />
-        </div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );

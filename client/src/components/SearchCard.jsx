@@ -1,48 +1,58 @@
 import React from "react";
-import { motion } from "framer-motion";
-import { FiFileText, FiDatabase, FiStar } from "react-icons/fi";
+import { useSearch } from "../context/SearchContext";
 
-const SearchCard = ({ result, onResultClick, index }) => {
-  const getIcon = () => {
-    // Simple logic to determine an icon based on title/tags
-    const title = result.title.toLowerCase();
-    if (title.includes("experiment") || title.includes("study"))
-      return <FiFileText className="text-primary" size={24} />;
-    if (title.includes("dataset"))
-      return <FiDatabase className="text-primary" size={24} />;
-    return <FiStar className="text-primary" size={24} />;
+const SearchCard = ({ entity }) => {
+  const { setSelectedEntity } = useSearch();
+
+  // Fail-safe check: If for any reason the entity is null, render nothing.
+  if (!entity) {
+    return null;
+  }
+
+  // 1. Use `entity.title` for the heading.
+  // 2. Use `entity.abstract` or `entity.summary` for the description.
+  // 3. Use the first author from `entity.byPeople` as the source.
+
+  const title = entity.title || "Untitled Study";
+  const description = (entity.abstract || entity.summary || "").substring(
+    0,
+    150
+  );
+  const source =
+    entity.byPeople && entity.byPeople.length > 0 ? entity.byPeople[0] : "N/A";
+
+  const handleCardClick = () => {
+    setSelectedEntity(entity);
   };
 
   return (
-    <motion.div
-      className="w-full p-4 rounded-lg border bg-card text-card-foreground cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all"
-      onClick={() => onResultClick(result)}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
+    <div
+      className="bg-gray-800 border border-gray-700 p-4 rounded-lg hover:bg-gray-700 cursor-pointer transition-colors duration-200"
+      onClick={handleCardClick}
     >
-      <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 mt-1">{getIcon()}</div>
-        <div className="flex-1">
-          <h4 className="font-semibold text-lg mb-1 leading-tight">
-            {result.title}
-          </h4>
-          <p className="text-sm text-muted-foreground mb-3">
-            {result.description.substring(0, 150)}...
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {result.tags.slice(0, 4).map((tag, i) => (
-              <div
-                key={`${tag}-${i}`}
-                className="text-xs font-medium px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground"
-              >
-                {tag}
-              </div>
-            ))}
-          </div>
-        </div>
+      <h3 className="text-lg font-bold text-cyan-400 truncate" title={title}>
+        {title}
+      </h3>
+
+      <p className="text-sm text-gray-400 mt-1">
+        Source: <span className="font-semibold text-gray-300">{source}</span>
+      </p>
+
+      {description && (
+        <p className="text-gray-300 mt-2 text-sm">{description}...</p>
+      )}
+
+      <div className="flex flex-wrap gap-2 mt-3">
+        {entity.tags?.slice(0, 5).map((tag, index) => (
+          <span
+            key={index}
+            className="bg-gray-700 text-cyan-300 text-xs font-medium px-2.5 py-0.5 rounded-full"
+          >
+            {tag}
+          </span>
+        ))}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
