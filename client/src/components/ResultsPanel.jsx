@@ -2,22 +2,41 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearch } from "../context/SearchContext";
 import TagsPanel from "./TagsPanel";
-// 1. Import our new SearchCard component
 import SearchCard from "./SearchCard";
 
 const ResultsPanel = ({ onResultClick }) => {
   const { searchResults, searchQuery, isSearching } = useSearch();
 
-  return (
-    <div className="flex flex-col h-full bg-surface text-text p-4">
-      <h2 className="text-xl font-bold mb-4 px-2">Explorer</h2>
+  // This clear logic determines exactly what to show and when.
+  const showTags = !searchQuery && !isSearching;
+  const showResults = searchResults.length > 0;
+  const showSearching = isSearching;
+  const showNoResults =
+    !isSearching && searchQuery && searchResults.length === 0;
 
-      <div className="flex-1 overflow-y-auto">
-        <AnimatePresence>
-          {searchResults.length > 0 && (
+  return (
+    // This structure ensures the panel's content can scroll.
+    <div className="flex flex-col h-full">
+      <h2 className="text-xl font-bold mb-4 px-4 pt-4 flex-shrink-0">
+        Explorer
+      </h2>
+
+      {/* This 'div' is the key to the scrolling fix. It will take up the
+          remaining space and scroll its content when it overflows. */}
+      <div className="flex-1 overflow-y-auto px-2">
+        {showSearching && (
+          <div className="flex justify-center items-center h-full">
+            <p className="text-center text-text-dim mt-8">Searching...</p>
+          </div>
+        )}
+
+        {/* This ensures the TagsPanel is displayed on initial load. */}
+        {showTags && <TagsPanel />}
+
+        {showResults && (
+          <AnimatePresence>
             <motion.div>
               <h3 className="text-lg font-semibold mb-2 px-2">Results</h3>
-              {/* 2. Replace the old list with a container for our new cards */}
               <div className="flex flex-col">
                 {searchResults.map((result, index) => (
                   <SearchCard
@@ -29,18 +48,15 @@ const ResultsPanel = ({ onResultClick }) => {
                 ))}
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-
-        {isSearching && (
-          <div className="flex justify-center items-center h-full">
-            <p className="text-center text-text-dim mt-8">Searching...</p>
-          </div>
+          </AnimatePresence>
         )}
 
-        {/* This will show the tags panel only when there is no active search */}
-        {!searchQuery && !isSearching && (
-          <TagsPanel />
+        {showNoResults && (
+          <div className="flex justify-center items-center h-full">
+            <p className="text-center text-text-dim mt-8">
+              No results found for "{searchQuery}"
+            </p>
+          </div>
         )}
       </div>
     </div>
