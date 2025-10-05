@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom"; // <-- Import ReactDOM
 import { motion } from "framer-motion";
 import { FiX, FiUsers, FiBookOpen, FiExternalLink } from "react-icons/fi";
 
@@ -22,7 +23,10 @@ const modalVariants = {
 const InspectorPanel = ({ entity, onClose }) => {
   if (!entity) return null;
 
-  return (
+  // **THE FIX IS HERE:**
+  // We use ReactDOM.createPortal to render the modal outside of the main DOM hierarchy.
+  // This ensures it covers the entire screen, including the header.
+  return ReactDOM.createPortal(
     <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       variants={backdropVariants}
@@ -38,7 +42,6 @@ const InspectorPanel = ({ entity, onClose }) => {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border flex-shrink-0">
-          {/* **FIX APPLIED HERE:** Changed `text-primary` to `text-foreground` for better contrast */}
           <h2 className="text-2xl font-bold text-foreground truncate pr-12">
             {entity.title || "Details"}
           </h2>
@@ -114,7 +117,8 @@ const InspectorPanel = ({ entity, onClose }) => {
           </div>
         )}
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.getElementById("modal-root")
   );
 };
 
