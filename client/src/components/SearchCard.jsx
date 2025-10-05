@@ -1,63 +1,47 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Tag, MessageSquarePlus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { motion } from "framer-motion";
+import { FiFileText, FiDatabase, FiStar } from "react-icons/fi";
 
 const SearchCard = ({ result, onResultClick, index }) => {
-  const navigate = useNavigate();
-  const { icon, title, type, summary, tags = [] } = result;
-
-  const handleCardClick = () => {
-    // This now updates the graph and inspector on the ExplorerPage
-    onResultClick(result);
-  };
-
-  const handleChatClick = (e) => {
-    // Stop the card's main click event from firing
-    e.stopPropagation(); 
-    navigate(`/chat/${result.id}`);
+  const getIcon = () => {
+    // Simple logic to determine an icon based on title/tags
+    const title = result.title.toLowerCase();
+    if (title.includes("experiment") || title.includes("study"))
+      return <FiFileText className="text-primary" size={24} />;
+    if (title.includes("dataset"))
+      return <FiDatabase className="text-primary" size={24} />;
+    return <FiStar className="text-primary" size={24} />;
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.07 }}
-      onClick={handleCardClick}
-      className="p-3 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors relative"
+      className="w-full p-4 rounded-lg border bg-card text-card-foreground cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all"
+      onClick={() => onResultClick(result)}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
     >
-      <div className="flex items-start gap-3">
-        <div className="mt-1 text-primary">{icon}</div>
+      <div className="flex items-start gap-4">
+        <div className="flex-shrink-0 mt-1">{getIcon()}</div>
         <div className="flex-1">
-          <p className="font-semibold text-text">{title}</p>
-          <p className="text-xs text-text-dim font-medium uppercase tracking-wider">{type}</p>
-          <p className="text-sm text-text-dim mt-2 line-clamp-2">
-            {summary}
+          <h4 className="font-semibold text-lg mb-1 leading-tight">
+            {result.title}
+          </h4>
+          <p className="text-sm text-muted-foreground mb-3">
+            {result.description.substring(0, 150)}...
           </p>
-          {tags && tags.length > 0 && (
-            <div className="mt-3 flex items-center flex-wrap gap-2">
-              <Tag size={14} className="text-text-dim" />
-              {tags.slice(0, 3).map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2 py-0.5 text-xs bg-primary/10 text-primary rounded-full"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {result.tags.slice(0, 4).map((tag, i) => (
+              <div
+                key={`${tag}-${i}`}
+                className="text-xs font-medium px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground"
+              >
+                {tag}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-      
-      {/* New button to navigate to the chat page */}
-      <button
-        onClick={handleChatClick}
-        className="absolute top-2 right-2 p-1 text-text-dim hover:text-primary transition-colors"
-        title={`Chat about ${title}`}
-      >
-        <MessageSquarePlus size={18} />
-      </button>
     </motion.div>
   );
 };
