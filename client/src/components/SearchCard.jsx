@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Tag } from "lucide-react";
 
 const SearchCard = ({ result, onResultClick, index }) => {
-  // Fallback for missing data
+  // Destructure the result object with default values to prevent errors
   const { icon, title, type, summary, tags = [] } = result;
 
   return (

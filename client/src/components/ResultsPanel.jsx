@@ -2,14 +2,14 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearch } from "../context/SearchContext";
 import TagsPanel from "./TagsPanel";
-// 1. Import the new SearchCard component
+// 1. Import our new SearchCard component
 import SearchCard from "./SearchCard";
 
 const ResultsPanel = ({ onResultClick }) => {
   const { searchResults, searchQuery, isSearching } = useSearch();
 
   return (
-    <div className="flex flex-col h-full bg-surface text-text p-4 border-r border-border">
+    <div className="flex flex-col h-full bg-surface text-text p-4">
       <h2 className="text-xl font-bold mb-4 px-2">Explorer</h2>
 
       <div className="flex-1 overflow-y-auto">
@@ -17,7 +17,7 @@ const ResultsPanel = ({ onResultClick }) => {
           {searchResults.length > 0 && (
             <motion.div>
               <h3 className="text-lg font-semibold mb-2 px-2">Results</h3>
-              {/* 2. Replace the <ul> with a div that renders SearchCard */}
+              {/* 2. Replace the old list with a container for our new cards */}
               <div className="flex flex-col">
                 {searchResults.map((result, index) => (
                   <SearchCard
@@ -38,6 +38,7 @@ const ResultsPanel = ({ onResultClick }) => {
           </div>
         )}
 
+        {/* This will show the tags panel only when there is no active search */}
         {!searchQuery && !isSearching && (
           <TagsPanel />
         )}

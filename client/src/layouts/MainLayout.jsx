@@ -1,14 +1,12 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import GlobalHeader from "../components/GlobalHeader";
 
 const MainLayout = () => {
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-background">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto relative">
-        <GlobalHeader />
+      <main className="flex-1 h-screen overflow-hidden">
         <Outlet />
       </main>
     </div>
