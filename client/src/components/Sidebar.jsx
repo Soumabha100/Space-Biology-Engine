@@ -1,68 +1,86 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Moon, Sun, Rocket, Book } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  Rocket,
+  BookOpen,
+  ChevronsRight,
+  ChevronsLeft,
+} from "lucide-react";
+import { useTheme } from "../context/ThemeContext"; // Assuming your context hook is named this
 
-const Sidebar = ({ isDark, toggleTheme }) => {
+const Sidebar = () => {
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <aside
-      className={`sidebar w-64 min-h-screen flex flex-col justify-between transition-all duration-300`}
+      onMouseEnter={() => setIsExpanded(true)}
+      onMouseLeave={() => setIsExpanded(false)}
+      className={`relative h-screen bg-surface border-r border-border flex flex-col justify-between transition-all duration-300 ease-in-out ${
+        isExpanded ? "w-64" : "w-20"
+      }`}
     >
       {/* Top Section */}
       <div>
-        <div className="px-6 py-5 text-2xl font-bold border-b border-gray-300 dark:border-gray-700 text-center">
-          🚀 Space Explorer
+        <div className="flex items-center justify-center h-20 border-b border-border">
+          <Rocket size={32} className="text-primary" />
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex flex-col p-5 space-y-3">
-          <Link
+        <nav className="flex flex-col p-4 space-y-2">
+          <SidebarItem
+            icon={<Rocket size={20} />}
+            text="Explorer"
             to="/explorer"
-            className={`flex items-center gap-3 px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 ${
-              location.pathname === "/explorer"
-                ? "bg-blue-600 text-white shadow-md"
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-            }`}
-          >
-            <Rocket size={18} />
-            Explorer Page
-          </Link>
-
-          <Link
+            active={location.pathname === "/explorer"}
+            expanded={isExpanded}
+          />
+          <SidebarItem
+            icon={<BookOpen size={20} />}
+            text="Resources"
             to="/resources"
-            className={`flex items-center gap-3 px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 ${
-              location.pathname === "/resources"
-                ? "bg-blue-600 text-white shadow-md"
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-            }`}
-          >
-            <Book size={18} />
-            Resources Hub
-          </Link>
+            active={location.pathname === "/resources"}
+            expanded={isExpanded}
+          />
         </nav>
       </div>
 
       {/* Bottom Theme Toggle */}
-      <div className="p-5 border-t border-gray-300 dark:border-gray-700">
+      <div className="flex flex-col items-center p-4 space-y-2 border-t border-border">
         <button
           onClick={toggleTheme}
-          className="w-full flex items-center justify-center gap-2 btn-primary transition-all duration-200"
+          className="flex items-center justify-center w-full h-12 rounded-lg text-text-dim hover:bg-primary/10 hover:text-primary transition-colors"
         >
-          {isDark ? (
-            <>
-              <Sun size={18} />
-              Light Mode
-            </>
-          ) : (
-            <>
-              <Moon size={18} />
-              Dark Mode
-            </>
-          )}
+          {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
         </button>
       </div>
     </aside>
+  );
+};
+
+// Helper component for sidebar items
+const SidebarItem = ({ icon, text, to, active, expanded }) => {
+  return (
+    <Link
+      to={to}
+      className={`flex items-center p-3 my-1 rounded-lg transition-colors ${
+        active
+          ? "bg-primary text-white shadow-lg"
+          : "text-text-dim hover:bg-primary/10 hover:text-primary"
+      }`}
+    >
+      {icon}
+      <span
+        className={`overflow-hidden transition-all ${
+          expanded ? "w-32 ml-3" : "w-0"
+        }`}
+      >
+        {text}
+      </span>
+    </Link>
   );
 };
 

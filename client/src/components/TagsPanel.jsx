@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import { useSearch } from "../context/SearchContext";
+// 1. Import the new getTags function
+import { getTags } from "../services/api";
 
 const TagsPanel = () => {
   const [tags, setTags] = useState([]);
   const { performSearch } = useSearch();
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/api/tags")
-      .then((response) => setTags(response.data))
-      .catch((error) => console.error("Error fetching tags:", error));
+    // 2. Use the centralized API function
+    const fetchTags = async () => {
+      const fetchedTags = await getTags();
+      setTags(fetchedTags);
+    };
+
+    fetchTags();
   }, []);
 
   const handleTagClick = (tag) => {
-    // This will update the global search bar and trigger a search
     document.querySelector('input[type="text"]').value = tag;
     performSearch(tag);
   };

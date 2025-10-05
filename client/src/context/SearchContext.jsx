@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext } from "react";
-import axios from "axios";
+import { searchEntities } from "../services/api"; 
 import { TestTube, Dna, FileText } from "lucide-react";
 
 const SearchContext = createContext();
@@ -28,12 +28,12 @@ export const SearchProvider = ({ children }) => {
     }
     setIsSearching(true);
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/docBySearch?q=${query}`
-      );
-      const resultsWithIcons = response.data.map((item) => ({
+      const results = await searchEntities(query); 
+
+      const resultsWithIcons = results.map((item) => ({
         ...item,
-        id: item.id || item.title, // Normalize the ID field
+        // The backend gives us a stable 'id' for keys
+        // and a 'title' for display. We pass the whole item.
         icon: getIconForType(item.type),
       }));
       setSearchResults(resultsWithIcons);
