@@ -4,22 +4,12 @@ import { config } from "dotenv";
 config();
 import cors from "cors";
 import OpenAI from "openai";
-import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 const app = express();
 app.disable("x-powered-by");
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
-const ratelimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes,
-  limit: 600,
-  message: {
-    status: 429,
-    message: "Ratelimit reached"
-  },
-  keyGenerator: (req) => ipKeyGenerator(req.headers['x-forwarded-for'] as string || req.ip?.[0]!)
-})
 
 export type Data = {
   id: string;
@@ -150,7 +140,7 @@ app.get("/api/docById/:id", (req, res) => {
   }
 });
 
-app.post("/api/createChat", ratelimit, (req, res) => {
+app.post("/api/createChat", (req, res) => {
   const { docId, messages } = req.body;
   if (!docId || !messages) return res.status(400).send({ status: 400, message: "Bad request" });
   if (messages.some((w: any) => w.role == "system")) return res.status(400).send({ status: 400, message: "Bad request" });
