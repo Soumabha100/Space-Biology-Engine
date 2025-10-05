@@ -1,46 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useSearch } from "../context/SearchContext";
-// 1. Import the new getTags function
 import { getTags } from "../services/api";
 
-const TagsPanel = () => {
+const TagsPanel = ({ onTagClick }) => {
   const [tags, setTags] = useState([]);
-  const { performSearch } = useSearch();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 2. Use the centralized API function
     const fetchTags = async () => {
+      setIsLoading(true);
       const fetchedTags = await getTags();
-      setTags(fetchedTags);
+      // To improve performance, let's only show a reasonable number of unique tags
+      const uniqueTags = [...new Set(fetchedTags)];
+      setTags(uniqueTags.slice(0, 50)); // Show up to 50 unique tags
+      setIsLoading(false);
     };
-
     fetchTags();
   }, []);
 
-  const handleTagClick = (tag) => {
-    document.querySelector('input[type="text"]').value = tag;
-    performSearch(tag);
-  };
+  if (isLoading) {
+    return <div className="text-center text-muted-foreground p-4">Loading topics...</div>;
+  }
 
   return (
-    <div className="px-2 mb-6">
-      <h3 className="text-sm font-semibold mb-3 text-text-dim uppercase tracking-wider">
-        Popular Topics
-      </h3>
-      <div className="flex flex-wrap gap-2">
+    <div>
+      <h3 className="text-lg font-semibold mb-4 px-2">Popular Topics</h3>
+      <div className="flex flex-wrap gap-2 px-2">
+        {/* --- START OF THE FIX --- */}
         {tags.map((tag, index) => (
           <motion.button
-            key={tag}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.05 }}
-            onClick={() => handleTagClick(tag)}
-            className="px-3 py-1 bg-surface hover:bg-primary/20 text-sm text-text-dim hover:text-text rounded-full border border-border transition-colors cursor-pointer"
+            // THE FIX: We combine the tag and its index to create a truly unique key.
+            key={`${tag}-${index}`}
+            className="px-3 py-1 text-sm rounded-full bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+            onClick={() => onTagClick(tag)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             {tag}
           </motion.button>
         ))}
+        {/* --- END OF THE FIX --- */}
       </div>
     </div>
   );

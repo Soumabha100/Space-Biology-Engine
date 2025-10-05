@@ -1,14 +1,21 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-export function useDebounce(callback, delay, dependencies) {
+// This is the correct implementation for a debounce hook that works with values like text.
+export function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
   useEffect(() => {
+    // Set up a timer that will update the debounced value after the delay
     const handler = setTimeout(() => {
-      callback();
+      setDebouncedValue(value);
     }, delay);
 
+    // This is the cleanup function that React runs.
+    // It clears the timer every time the 'value' changes.
     return () => {
       clearTimeout(handler);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...(dependencies || []), delay]);
+  }, [value, delay]); // Only re-run the effect if value or delay changes
+
+  return debouncedValue;
 }
