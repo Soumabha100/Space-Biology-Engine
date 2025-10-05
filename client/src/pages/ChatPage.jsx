@@ -63,7 +63,7 @@ const ChatPage = () => {
 
     
     // Use the functional form again to add the AI's response correctly
-    setMessages((prevMessages) => [...prevMessages, aiResponse.data]);
+    setMessages((prevMessages) => [...prevMessages, {role:"assistant", content: aiResponse.data}]);
     setIsLoading(false);
   };
 
