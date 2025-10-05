@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { searchEntities, getEntityData } from "../services/api";
+import { searchEntities, getEntityData } from "../services/api"; // Ensure getEntityData is imported
 import { useDebounce } from "../hooks/useDebounce";
 
 const SearchContext = createContext();
@@ -23,28 +23,50 @@ export const SearchProvider = ({ children }) => {
   const canLoadMore = searchResults.length < totalResults;
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  const performSearch = useCallback(async (query, page = 1) => {
-    if (!query) {
-      setSearchResults([]);
-      setTotalResults(0);
-      return;
-    }
+  const performSearch = useCallback(
+    async (query, page = 1) => {
+      if (!query) {
+        setSearchResults([]);
+        setTotalResults(0);
+        return;
+      }
 
-    setIsSearching(true);
-    try {
-      const response = await searchEntities(query, page);
-      const { data = [], total = 0 } = response;
+      setIsSearching(true);
+      try {
+        let response;
 
-      setSearchResults((prev) => (page === 1 ? data : [...prev, ...data]));
-      setTotalResults(total);
-    } catch (error) {
-      console.error("Failed to perform search:", error);
-      setSearchResults([]);
-      setTotalResults(0);
-    } finally {
-      setIsSearching(false);
-    }
-  }, []);
+        // --- START OF THE FIX ---
+        // If query is an ID, use the dedicated endpoint for a direct match.
+        if (query.startsWith("#")) {
+          // An ID search returns only one result, so no pagination is needed.
+          if (page === 1) {
+            const entity = await getEntityData(query.substring(1));
+            response = entity
+              ? { data: [entity], total: 1 }
+              : { data: [], total: 0 };
+          } else {
+            // If trying to "load more" on an ID search, return nothing.
+            response = { data: [], total: searchResults.length };
+          }
+        } else {
+          // For all other searches (text or tag), use the general search endpoint.
+          response = await searchEntities(query, page);
+        }
+        // --- END OF THE FIX ---
+
+        const { data = [], total = 0 } = response;
+        setSearchResults((prev) => (page === 1 ? data : [...prev, ...data]));
+        setTotalResults(total);
+      } catch (error) {
+        console.error("Failed to perform search:", error);
+        setSearchResults([]);
+        setTotalResults(0);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [searchResults.length]
+  ); // Dependency prevents redundant calls when loading more.
 
   useEffect(() => {
     setCurrentPage(1);
@@ -76,7 +98,7 @@ export const SearchProvider = ({ children }) => {
         canLoadMore,
         loadMoreResults,
         searchByTag,
-        performSearch, // --- FIX: Add performSearch back to the context value ---
+        performSearch,
       }}
     >
       {children}

@@ -1,21 +1,13 @@
 import express from "express";
-import AI from "./ai.js";
 import fs from "fs";
 import { config } from "dotenv";
 config();
 import cors from "cors";
-import OpenAI from "openai";
 
 const app = express();
 app.disable("x-powered-by");
 app.use(cors());
 app.use(express.json());
-
-const ai = new AI();
-const openai = new OpenAI({
-  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
-  apiKey: process.env.GEMINI_API_KEY || "",
-});
 
 export type Data = {
   id: string;
@@ -38,7 +30,6 @@ const processedData: Data[] = JSON.parse(
   fs.readFileSync(process.cwd() + "/processed.json").toString()
 );
 
-// Get a set of all unique tags for quick lookups
 const allUniqueTags = new Set(processedData.flatMap((doc) => doc.tags || []));
 
 const calculateRelevance = (doc: Data, query: string): number => {
@@ -83,20 +74,6 @@ app.get("/api/docBySearch", async (req, res) => {
     return res.status(400).send({ status: 400, message: "Missing query" });
   }
 
-  // --- START OF THE FIX ---
-  // ID Search with '#'
-  if (query.startsWith("#")) {
-    const id = query.substring(1);
-    const doc = processedData.find((d) => d.id === id);
-    if (doc) {
-      const { embedding, schTxt, processedAt, ...rest } = doc;
-      return res.send({ status: 200, data: [rest], total: 1 });
-    } else {
-      return res.send({ status: 200, data: [], total: 0 });
-    }
-  }
-
-  // Direct Tag Search (when clicking from sidebar)
   if (allUniqueTags.has(query)) {
     const matchingDocs = processedData.filter(
       (doc) => doc.tags && doc.tags.includes(query)
@@ -115,9 +92,7 @@ app.get("/api/docBySearch", async (req, res) => {
       total: matchingDocs.length,
     });
   }
-  // --- END OF THE FIX ---
 
-  // Default text search
   const scoredDocs = processedData
     .map((doc) => ({
       ...doc,
@@ -156,36 +131,6 @@ app.get("/api/docById/:id", (req, res) => {
     const { embedding, schTxt, processedAt, ...rest } = data;
     res.send({ status: 200, data: rest });
   }
-});
-
-app.post("/api/createChat", async (req, res) => {
-  const { docId, messages } = req.body;
-  if (!docId)
-    return res.status(400).send({ status: 400, message: "Missing docId" });
-  let data = processedData.find((x) => x.id == docId);
-  if (!data)
-    return res.status(404).send({ status: 404, message: "Document not found" });
-
-  const { embedding, processedAt, schTxt, ...context } = data;
-
-  openai.chat.completions
-    .create({
-      model: "gemini-1.5-flash",
-      messages: [
-        {
-          role: "system",
-          content: `You're an expert in NASA's biological publications...`,
-        },
-        ...messages,
-      ],
-    })
-    .then((completion) => {
-      res.send({ status: 200, data: completion.choices[0].message });
-    })
-    .catch((err) => {
-      console.trace(err);
-      res.status(500).send({ status: 500, message: "Failed to create chat" });
-    });
 });
 
 app.listen(process.env.PORT || 3000, () => {
