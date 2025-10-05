@@ -1,15 +1,20 @@
 import React from "react";
-import ReactDOM from "react-dom"; // <-- Import ReactDOM
+import ReactDOM from "react-dom";
 import { motion } from "framer-motion";
-import { FiX, FiUsers, FiBookOpen, FiExternalLink } from "react-icons/fi";
+import {
+  FiX,
+  FiUsers,
+  FiBookOpen,
+  FiExternalLink,
+  FiTag,
+  FiHash, // <-- Import the new icon
+} from "react-icons/fi";
 
-// Backdrop animation
 const backdropVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
 };
 
-// Modal animation
 const modalVariants = {
   hidden: { y: "100vh", opacity: 0 },
   visible: {
@@ -23,9 +28,6 @@ const modalVariants = {
 const InspectorPanel = ({ entity, onClose }) => {
   if (!entity) return null;
 
-  // **THE FIX IS HERE:**
-  // We use ReactDOM.createPortal to render the modal outside of the main DOM hierarchy.
-  // This ensures it covers the entire screen, including the header.
   return ReactDOM.createPortal(
     <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
@@ -33,14 +35,13 @@ const InspectorPanel = ({ entity, onClose }) => {
       initial="hidden"
       animate="visible"
       exit="exit"
-      onClick={onClose} // Close modal on backdrop click
+      onClick={onClose}
     >
       <motion.div
         className="relative w-full max-w-4xl max-h-[90vh] bg-card text-card-foreground rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-border"
         variants={modalVariants}
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border flex-shrink-0">
           <h2 className="text-2xl font-bold text-foreground truncate pr-12">
             {entity.title || "Details"}
@@ -54,9 +55,7 @@ const InspectorPanel = ({ entity, onClose }) => {
           </button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8">
-          {/* Abstract Section */}
           <div>
             <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
               Abstract
@@ -66,7 +65,8 @@ const InspectorPanel = ({ entity, onClose }) => {
             </p>
           </div>
 
-          {/* Authors Section */}
+    
+
           {entity.byPeople && entity.byPeople.length > 0 && (
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
@@ -79,7 +79,37 @@ const InspectorPanel = ({ entity, onClose }) => {
             </div>
           )}
 
-          {/* Source Link */}
+          {entity.tags && entity.tags.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
+                <FiTag />
+                Tags
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {entity.tags.map((tag, index) => (
+                  <div
+                    key={index}
+                    className="text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground"
+                  >
+                    {tag}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {entity.id && (
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
+                <FiHash />
+                Document ID
+              </h3>
+              <p className="text-base text-foreground/80 font-mono bg-muted px-2 py-1 rounded-md inline-block">
+                {entity.id}
+              </p>
+            </div>
+          )}
+
           {entity.url && (
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
@@ -97,25 +127,6 @@ const InspectorPanel = ({ entity, onClose }) => {
             </div>
           )}
         </div>
-
-        {/* Footer with Tags */}
-        {entity.tags && entity.tags.length > 0 && (
-          <div className="p-6 border-t border-border bg-background/50 flex-shrink-0">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-              Tags
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {entity.tags.map((tag, index) => (
-                <div
-                  key={index}
-                  className="text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground"
-                >
-                  {tag}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </motion.div>
     </motion.div>,
     document.getElementById("modal-root")

@@ -17,7 +17,6 @@ const openai = new OpenAI({
   apiKey: process.env.GEMINI_API_KEY || "",
 });
 
-
 export type Data = {
   id: string;
   title: string;
@@ -39,6 +38,9 @@ const processedData: Data[] = JSON.parse(
   fs.readFileSync(process.cwd() + "/processed.json").toString()
 );
 
+// Get a set of all unique tags for quick lookups
+const allUniqueTags = new Set(processedData.flatMap((doc) => doc.tags || []));
+
 const calculateRelevance = (doc: Data, query: string): number => {
   let score = 0;
   const lowerCaseQuery = query.toLowerCase();
@@ -57,7 +59,6 @@ const calculateRelevance = (doc: Data, query: string): number => {
     if (doc.title.toLowerCase().includes(term)) {
       score += 10;
     }
-    // This now correctly checks both abstract and description without error
     const description = (doc.abstract || doc.description || "").toLowerCase();
     if (description.includes(term)) {
       score += 5;
@@ -82,6 +83,41 @@ app.get("/api/docBySearch", async (req, res) => {
     return res.status(400).send({ status: 400, message: "Missing query" });
   }
 
+  // --- START OF THE FIX ---
+  // ID Search with '#'
+  if (query.startsWith("#")) {
+    const id = query.substring(1);
+    const doc = processedData.find((d) => d.id === id);
+    if (doc) {
+      const { embedding, schTxt, processedAt, ...rest } = doc;
+      return res.send({ status: 200, data: [rest], total: 1 });
+    } else {
+      return res.send({ status: 200, data: [], total: 0 });
+    }
+  }
+
+  // Direct Tag Search (when clicking from sidebar)
+  if (allUniqueTags.has(query)) {
+    const matchingDocs = processedData.filter(
+      (doc) => doc.tags && doc.tags.includes(query)
+    );
+    const startIndex = (page - 1) * limit;
+    const paginatedData = matchingDocs
+      .slice(startIndex, startIndex + limit)
+      .map((doc) => {
+        const { embedding, schTxt, processedAt, ...rest } = doc;
+        return rest;
+      });
+
+    return res.send({
+      status: 200,
+      data: paginatedData,
+      total: matchingDocs.length,
+    });
+  }
+  // --- END OF THE FIX ---
+
+  // Default text search
   const scoredDocs = processedData
     .map((doc) => ({
       ...doc,
@@ -105,26 +141,9 @@ app.get("/api/docBySearch", async (req, res) => {
   });
 });
 
-
 app.get("/api/docByTags", (req, res) => {
-  const tagsQuery = req.query.tags;
-  if (!tagsQuery) {
-    res.send({ status: 200, tags: processedData.map((x) => x.tags).flat() });
-    return;
-  }
-  const tags = tagsQuery.toString().split(",");
-  const data = processedData.filter(
-    (x) => x.tags && tags.some((t) => x.tags.includes(t))
-  );
-  if (!data || data.length === 0) {
-    res.status(404).send({ status: 404, message: "Documents not found" });
-  } else {
-    const cleanedData = data.map((x) => {
-      const { embedding, schTxt, processedAt, ...rest } = x;
-      return rest;
-    });
-    res.send({ status: 200, data: cleanedData });
-  }
+  const allTags = [...new Set(processedData.flatMap((x) => x.tags || []))];
+  res.send({ status: 200, tags: allTags });
 });
 
 app.get("/api/docById/:id", (req, res) => {
@@ -149,31 +168,24 @@ app.post("/api/createChat", async (req, res) => {
 
   const { embedding, processedAt, schTxt, ...context } = data;
 
-  openai.conversations
+  openai.chat.completions
     .create({
-      items: [
+      model: "gemini-1.5-flash",
+      messages: [
         {
           role: "system",
-          content: `You're an expert in NASA's biological publications...`, 
+          content: `You're an expert in NASA's biological publications...`,
         },
-        ...messages, 
+        ...messages,
       ],
     })
-    .then((conv) => {
-      res.send({ status: 200, data: conv });
+    .then((completion) => {
+      res.send({ status: 200, data: completion.choices[0].message });
     })
     .catch((err) => {
       console.trace(err);
       res.status(500).send({ status: 500, message: "Failed to create chat" });
     });
-});
-
-app.get("/api/chat", async (req, res) => {
-  if (!req.query.q)
-    return res.status(400).send({ status: 400, message: "Missing query" });
-  if (!req.query.chatId)
-    return res.status(400).send({ status: 400, message: "Missing chatId" });
-  // Your chat logic here
 });
 
 app.listen(process.env.PORT || 3000, () => {

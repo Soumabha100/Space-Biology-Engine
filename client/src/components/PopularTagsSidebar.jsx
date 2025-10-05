@@ -7,7 +7,7 @@ import { useSearch } from "../context/SearchContext";
 const PopularTagsSidebar = () => {
   const [tags, setTags] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { setSearchQuery } = useSearch();
+  const { searchByTag } = useSearch(); // Use the new dedicated function
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -21,7 +21,8 @@ const PopularTagsSidebar = () => {
   }, []);
 
   const handleTagClick = (tag) => {
-    setSearchQuery(tag);
+    // This now immediately triggers a search for the tag
+    searchByTag(tag);
   };
 
   return (
@@ -36,10 +37,7 @@ const PopularTagsSidebar = () => {
           <p className="text-muted-foreground">Loading...</p>
         </div>
       ) : (
-        // --- START OF THE FIX ---
-        // Replace the old scrollbar classes with our new custom one
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-          {/* --- END OF THE FIX --- */}
           <div className="flex flex-wrap gap-2">
             {tags.map((tag, index) => (
               <motion.button

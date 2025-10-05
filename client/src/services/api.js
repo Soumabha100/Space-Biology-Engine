@@ -15,8 +15,6 @@ export const getEntityData = async (entityId) => {
   }
 };
 
-// --- START OF THE DEFINITIVE FIX ---
-// The function now correctly accepts 'page' as an argument.
 export const searchEntities = async (query, page = 1) => {
   try {
     const response = await axios.get(
@@ -25,10 +23,21 @@ export const searchEntities = async (query, page = 1) => {
     return response.data;
   } catch (error) {
     console.error("Error performing search:", error);
-    return { data: [], total: 0 }; // Return a default object on error
+    return { data: [], total: 0 };
   }
 };
-// --- END OF THE DEFINITIVE FIX ---
+
+export const searchByTags = async (tags, page = 1) => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/docByTags?tags=${tags}&page=${page}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error searching by tags:", error);
+    return { data: [], total: 0 };
+  }
+};
 
 export const getTags = async () => {
   try {

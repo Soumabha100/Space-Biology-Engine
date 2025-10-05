@@ -107,7 +107,6 @@ const ExplorerPage = () => {
   };
 
   return (
-    // This top-level div allows the modal to overlay the entire page
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
       <GlobalHeader />
       <main className="flex flex-1 overflow-hidden">

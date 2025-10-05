@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { searchEntities } from "../services/api";
+import { searchEntities, getEntityData } from "../services/api";
 import { useDebounce } from "../hooks/useDebounce";
 
 const SearchContext = createContext();
@@ -19,41 +19,34 @@ export const SearchProvider = ({ children }) => {
   const [selectedEntity, setSelectedEntity] = useState(null);
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [canLoadMore, setCanLoadMore] = useState(false);
 
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const canLoadMore = searchResults.length < totalResults;
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   const performSearch = useCallback(async (query, page = 1) => {
     if (!query) {
       setSearchResults([]);
       setTotalResults(0);
-      setCanLoadMore(false);
       return;
     }
 
     setIsSearching(true);
     try {
-      // The API returns an object { data, total }, so we destructure it here.
-      const { data, total } = await searchEntities(query, page);
+      const response = await searchEntities(query, page);
+      const { data = [], total = 0 } = response;
 
-      // If it's the first page, we replace the results. Otherwise, we append them.
       setSearchResults((prev) => (page === 1 ? data : [...prev, ...data]));
       setTotalResults(total);
-
-      // Determine if there are more results to load.
-      setCanLoadMore(data.length > 0 && page * 15 < total);
     } catch (error) {
       console.error("Failed to perform search:", error);
       setSearchResults([]);
       setTotalResults(0);
-      setCanLoadMore(false);
     } finally {
       setIsSearching(false);
     }
   }, []);
 
   useEffect(() => {
-    // Reset to the first page and perform a new search when the query changes.
     setCurrentPage(1);
     performSearch(debouncedSearchQuery, 1);
   }, [debouncedSearchQuery, performSearch]);
@@ -64,6 +57,10 @@ export const SearchProvider = ({ children }) => {
       setCurrentPage(nextPage);
       performSearch(debouncedSearchQuery, nextPage);
     }
+  };
+
+  const searchByTag = (tag) => {
+    setSearchQuery(tag);
   };
 
   return (
@@ -78,6 +75,8 @@ export const SearchProvider = ({ children }) => {
         totalResults,
         canLoadMore,
         loadMoreResults,
+        searchByTag,
+        performSearch, // --- FIX: Add performSearch back to the context value ---
       }}
     >
       {children}
