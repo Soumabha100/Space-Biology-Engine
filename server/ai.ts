@@ -1,6 +1,6 @@
-import OpenAI from 'openai'
 import { pipeline, type PipelineType } from '@xenova/transformers'
 import type { Data } from './index.js';
+import Cerebras from '@cerebras/cerebras_cloud_sdk';
 
 class EmbeddingSingleton {
     static task: PipelineType = 'feature-extraction';
@@ -16,13 +16,12 @@ class EmbeddingSingleton {
 }
 
 class AI {
-    openai: OpenAI
+    openai: Cerebras
     model: any
     embeddingModel: any
     constructor() {
-        this.openai = new OpenAI({
+        this.openai = new Cerebras({
             apiKey: process.env.GEMINI_API_KEY || '',
-            baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/'
         })
         this.model = process.env.OPENAI_MODEL || 'gemini-2.5-flash'
         this.embeddingModel = process.env.EMBEDDING_MODEL || 'gemini-embedding-001'
@@ -166,11 +165,10 @@ class AI {
     }
 
     async genInfo(content: string, type: string = 'experiment'): Promise<object> {
-        const openai = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY || 'AIzaSyDIFhqc8SsefTwmvv4oU_7MNkwVW-vNu8s',
-            baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/'
+        const openai = new Cerebras({
+            apiKey: process.env.GEMINI_API_KEY as string,
         })
-        const model = process.env.OPENAI_MODEL || 'gemini-2.5-flash'
+        const model = process.env.OPENAI_MODEL || "gpt-oss-120b"
         try {
             const prompt = this._buildGenInfoPrompt(content, type)
             const response = await openai.chat.completions.create({
@@ -188,7 +186,7 @@ class AI {
                 temperature: 0.3,
                 max_completion_tokens: 2048
             })
-            const summaryText = response.choices[0]?.message.content || ''
+            const summaryText = (response.choices as any)?.[0]?.message
             return this._parseGenInfoResponse(summaryText)
         } catch (error) {
             console.error('Error generating AI summary:', error)
