@@ -1,5 +1,4 @@
 import express from "express";
-import fs from "fs";
 import { config } from "dotenv";
 config();
 import cors from "cors";
@@ -10,6 +9,7 @@ app.disable("x-powered-by");
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
+app.set('trust proxy', 1)
 
 export type Data = {
   id: string;
@@ -29,6 +29,7 @@ export type Data = {
 };
 
 import p from "./processed.js"
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 var processedData: Data[] = p as unknown as Data[];
 const openai = new Cerebras({
   apiKey: process.env.GEMINI_API_KEY as string
@@ -137,7 +138,15 @@ app.get("/api/docById/:id", (req, res) => {
   }
 });
 
-app.post("/api/createChat", (req, res) => {
+app.post("/api/createChat", rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 50,
+  message: {
+    status: 429,
+    message: "Ratelimit reached. Come back tomorrow."
+  },
+  keyGenerator: (req) => ipKeyGenerator(req.headers['x-forwarded-for'] as string)
+}), (req, res) => {
   const { docId, messages } = req.body;
   if (!docId || !messages) return res.status(400).send({ status: 400, message: "Bad request" });
   if (messages.some((w: any) => w.role == "system")) return res.status(400).send({ status: 400, message: "Bad request" });
