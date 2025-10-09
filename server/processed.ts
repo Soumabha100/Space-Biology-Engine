@@ -1,4 +1,4 @@
-[
+export default [
  {
   "id": "PMC4136787",
   "title": "Mice in Bion-M 1 space mission: training and selection",

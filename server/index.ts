@@ -28,10 +28,8 @@ export type Data = {
   processedAt?: Date;
 };
 
-const processedData: Data[] = JSON.parse(
-  fs.readFileSync(process.cwd() + "/processed.json").toString()
-);
-
+import p from "./processed.js"
+var processedData: Data[] = p as unknown as Data[];
 const openai = new Cerebras({
   apiKey: process.env.GEMINI_API_KEY as string
 })
